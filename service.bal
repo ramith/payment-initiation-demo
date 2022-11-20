@@ -6,7 +6,6 @@ import ballerina/http;
 import ballerina/log;
 
 configurable string clientSecret = ?;
-
 configurable string clientId = ?;
 
 type SUPPORTED_CURRENCIES "USD"|"GBP"|"INR"|"EURO";
