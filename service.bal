@@ -1,9 +1,15 @@
+import ballerinax/asb;
 import ramith/payment_execution;
 import ramith/fraud_check;
 import ramith/payment_remediation;
 import ballerina/time;
 import ballerina/http;
 import ballerina/log;
+import ballerina/mime;
+
+configurable string asbEntityPath = ?;
+
+configurable string asbConnectionString = ?;
 
 configurable string clientSecret = ?;
 configurable string clientId = ?;
@@ -30,6 +36,8 @@ type PaymentEvent record {
     anydata|error payload?;
 };
 
+asb:MessageSender azureServiceBusEndpoint = check new (connectionString = asbConnectionString, entityPath = asbEntityPath);
+
 # A service representing a network-accessible API
 # bound to port `9090`.
 service / on new http:Listener(9090) {
@@ -38,6 +46,7 @@ service / on new http:Listener(9090) {
     # + paymentInitation - the input string name
     # + return - result of the initiation or an error message
     resource function post payment/init(@http:Payload PaymentInitiation paymentInitation) returns PaymentInitiationResult|error {
+        log:printInfo("payment init recieved", accountId = paymentInitation.orderId);
 
         error? validationOutcome = validate(paymentInitation);
         _ = start emitPaymentEvent({
@@ -47,6 +56,7 @@ service / on new http:Listener(9090) {
         });
 
         if validationOutcome is error {
+            log:printWarn("payment validation failed", validationOutcome, orderId = paymentInitation.orderId);
 
             payment_remediation:Client paymentRemediationEp = check new (clientConfig = {
                 auth: {
@@ -110,7 +120,7 @@ service / on new http:Listener(9090) {
         fraud_check:FraudCheckResult|error fraudCheckResponse = wait asyncFraudCheckResponse;
         _ = start emitPaymentEvent({
             orderId: paymentInitation.orderId,
-            message: "fraude check result received",
+            message: "fraud check result received",
             payload: fraudCheckResponse
         });
 
@@ -154,6 +164,30 @@ function toRemediationRequest(PaymentInitiation paymentInitiation) returns Payme
     receivedOn: time:utcToString(time:utcNow())
 };
 
-function emitPaymentEvent(PaymentEvent event) {
-    log:printInfo("emiting payment event", paymentEvent = event.toString());
+function emitPaymentEvent(PaymentEvent event) returns error? {
+    log:printInfo("emitting payment event", paymentEvent = event.toString());
+
+    map<json> jsonEvent = {
+        "orderId": event.orderId,
+        "message": event.message,
+        "occurredAt": event.occurredAt
+    };
+
+    if event.hasKey("payload") {
+        anydata|error payload = event?.payload;
+        if payload is error {
+            jsonEvent["payload"] = {
+                errorMessage: payload.message()
+            };
+        } else {
+            jsonEvent["payload"] = payload.toJson();
+        }
+    }
+
+    _ = check azureServiceBusEndpoint->send({
+        contentType: mime:APPLICATION_JSON,
+        body: jsonEvent
+    }
+    );
+
 }
