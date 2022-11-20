@@ -15,12 +15,22 @@
             "clientId": {
               "type": "string",
               "description": ""
+            },
+            "asbConnectionString": {
+              "type": "string",
+              "description": ""
+            },
+            "asbEntityPath": {
+              "type": "string",
+              "description": ""
             }
           },
           "additionalProperties": false,
           "required": [
             "clientSecret",
-            "clientId"
+            "clientId",
+            "asbConnectionString",
+            "asbEntityPath"
           ]
         }
       },
