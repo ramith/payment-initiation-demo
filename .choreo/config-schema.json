@@ -11,6 +11,10 @@
             "clientSecret": {
               "type": "string",
               "description": ""
+            },
+            "clientId": {
+              "type": "string",
+              "description": ""
             }
           },
           "additionalProperties": false,
