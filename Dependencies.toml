@@ -183,6 +183,9 @@ dependencies = [
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "observe"}
 ]
+modules = [
+	{org = "ballerina", packageName = "log", moduleName = "log"}
+]
 
 [[package]]
 org = "ballerina"
@@ -247,6 +250,9 @@ version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
+modules = [
+	{org = "ballerina", packageName = "time", moduleName = "time"}
+]
 
 [[package]]
 org = "ballerina"
@@ -270,14 +276,55 @@ modules = [
 
 [[package]]
 org = "ramith"
+name = "fraud_check"
+version = "1.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "url"}
+]
+modules = [
+	{org = "ramith", packageName = "fraud_check", moduleName = "fraud_check"}
+]
+
+[[package]]
+org = "ramith"
+name = "payment_execution"
+version = "1.0.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "url"}
+]
+modules = [
+	{org = "ramith", packageName = "payment_execution", moduleName = "payment_execution"}
+]
+
+[[package]]
+org = "ramith"
 name = "payment_initiation"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "time"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ramith", name = "fraud_check"},
+	{org = "ramith", name = "payment_execution"},
+	{org = "ramith", name = "payment_remediation"}
 ]
 modules = [
 	{org = "ramith", packageName = "payment_initiation", moduleName = "payment_initiation"}
+]
+
+[[package]]
+org = "ramith"
+name = "payment_remediation"
+version = "1.0.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "url"}
+]
+modules = [
+	{org = "ramith", packageName = "payment_remediation", moduleName = "payment_remediation"}
 ]
 
 
